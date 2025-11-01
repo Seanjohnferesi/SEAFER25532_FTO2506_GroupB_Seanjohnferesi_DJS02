@@ -21,6 +21,10 @@ export class PodcastPreview extends HTMLElement {
         
         const style = document.createElement("style");
         style.textContent = `
+            *{
+                box-sizing: border-box;
+            }
+
             .podcast-container {
                 width: 100%;
                 border: 1px solid var(--color-border);
@@ -71,6 +75,13 @@ export class PodcastPreview extends HTMLElement {
                 font-size: 0.7rem;
                 color: var(--color-text);
             }
+
+            .genre-wrapper{
+                display: flex;
+                gap: 3px;
+                margin-top: 5px;
+            }
+
         `
 
         this.card.classList.add("podcast-container");
@@ -107,15 +118,14 @@ export class PodcastPreview extends HTMLElement {
         }
     }
 
-
-    connectedCallback () {
-
-    }
 }
 
 customElements.define("podcast-preview", PodcastPreview);
 
 export function renderPodcast2() {
+ 
+    podGrid.classList.add("podcast-grid");
+
     podcasts.forEach(podcast => {
         const podcastEl = document.createElement("podcast-preview");
         podcastEl.setAttribute("pod-title", podcast.title);
@@ -126,7 +136,8 @@ export function renderPodcast2() {
         const showGenres = genres.filter(genre => genre.shows.includes(podcast.id)).map(genre => genre.title).join(", ");
 
         podcastEl.setAttribute("pod-genres", showGenres);
-        console.log(showGenres)
+        // console.log(showGenres)
+
 
         podGrid.appendChild(podcastEl);
 
