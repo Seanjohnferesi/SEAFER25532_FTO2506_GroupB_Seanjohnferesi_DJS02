@@ -134,7 +134,7 @@ body{
         color: var(--color-content-text);
     }
 
-    .season-wrapper > img {
+    .season-icon{
         width: 20px;
         height: 20px;
     }
