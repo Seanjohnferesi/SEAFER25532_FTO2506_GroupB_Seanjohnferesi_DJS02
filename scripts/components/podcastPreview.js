@@ -1,6 +1,7 @@
 
 import { podcasts, genres } from "../utils/data.js";
 import { podGrid } from "../utils/dom.js";
+import { formatDate } from "../utils/formatDate.js";
 
 export class PodcastPreview extends HTMLElement {
     constructor() {
@@ -17,7 +18,7 @@ export class PodcastPreview extends HTMLElement {
         this._seasons = document.createElement("span");
         this.genreWrapper = document.createElement("div");
         this.genreWrapper.classList.add("genre-wrapper");
-
+        this.updateTime = document.createElement("p");
         
         const style = document.createElement("style");
         style.textContent = `
@@ -33,6 +34,10 @@ export class PodcastPreview extends HTMLElement {
                 padding: 15px;
                 cursor: pointer;
                 transition: transform .5s ease;
+            }
+
+            .podcast-container:hover{
+                transform: scale(1.1);
             }
 
             .podcast-img-div{
@@ -92,21 +97,23 @@ export class PodcastPreview extends HTMLElement {
         this.seasonIcon.classList.add("season-icon");
         this.seasonIcon.src = "./images/season.png";
         this._seasons.textContent = `${podcasts.seasons} seasons`;
+        this.updateTime.classList.add("update-time");
 
-        this.card.append(this.imgContainer, this._title, this.seasonContainer, this.genreWrapper);
+        this.card.append(this.imgContainer, this._title, this.seasonContainer, this.genreWrapper, this.updateTime);
         this.imgContainer.append(this._Img);
         this.seasonContainer.append(this.seasonIcon, this._seasons);
         this.shadow.append(style, this.card)
     }
 
     static get observedAttributes(){
-            return ["pod-title", "pod-image", "pod-genres", "pod-seasons"]
+            return ["pod-title", "pod-image", "pod-genres", "pod-seasons", "pod-date"]
         }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "pod-title") this._title.textContent = newValue;
         if (name === "pod-image") this._Img.src = newValue;
         if (name === "pod-seasons") this._seasons.textContent = newValue;
+        if (name === "pod-date") this.updateTime.textContent = newValue
         if (name === "pod-genres") {
             this.genreWrapper.innerHTML = "";
             newValue.split(', ').forEach(title => {
@@ -124,20 +131,20 @@ customElements.define("podcast-preview", PodcastPreview);
 
 export function renderPodcast2() {
  
-    podGrid.classList.add("podcast-grid");
-
     podcasts.forEach(podcast => {
         const podcastEl = document.createElement("podcast-preview");
         podcastEl.setAttribute("pod-title", podcast.title);
         podcastEl.setAttribute("pod-image", podcast.image);
         podcastEl.setAttribute("pod-seasons", `${podcast.seasons} seasons`)
-
+        
         // genres
         const showGenres = genres.filter(genre => genre.shows.includes(podcast.id)).map(genre => genre.title).join(", ");
-
         podcastEl.setAttribute("pod-genres", showGenres);
         // console.log(showGenres)
 
+        // UPDATE TIME
+        const updatedTime = formatDate(podcast.updated)
+        podcastEl.setAttribute("pod-date", `Updated ${updatedTime}`);
 
         podGrid.appendChild(podcastEl);
 
