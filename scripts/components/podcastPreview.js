@@ -1,7 +1,9 @@
 
 import { podcasts, genres } from "../utils/data.js";
-import { podGrid } from "../utils/dom.js";
+import { podGrid, modalDesc, modalGenres, modalDate, modalSeasons } from "../utils/dom.js";
 import { formatDate } from "../utils/formatDate.js";
+import { modalOpen, modalClose } from "./componentModalManager.js";
+
 
 export class PodcastPreview extends HTMLElement {
     constructor() {
@@ -17,13 +19,19 @@ export class PodcastPreview extends HTMLElement {
         this.seasonIcon = document.createElement("img");
         this._seasons = document.createElement("span");
         this.genreWrapper = document.createElement("div");
-        this.genreWrapper.classList.add("genre-wrapper");
         this.updateTime = document.createElement("p");
+        this._desc = document.createElement("p");
         
         const style = document.createElement("style");
         style.textContent = `
             *{
                 box-sizing: border-box;
+            }
+
+            :host {
+                width: 100%;
+                height: 100%;
+                overflow: none;
             }
 
             .podcast-container {
@@ -47,7 +55,6 @@ export class PodcastPreview extends HTMLElement {
 
             .podcast-img{
                 width: 100%;
-                /* height: 190px; */
                 border: 1px solid var(--color-border);
                 border-radius: 8px;
                 background-color: var(--color-btn);
@@ -83,12 +90,54 @@ export class PodcastPreview extends HTMLElement {
 
             .genre-wrapper{
                 display: flex;
+                flex-wrap: wrap;
                 gap: 3px;
                 margin-top: 5px;
             }
 
+            .update-time{
+                margin: 0;
+                margin-top: 10px;
+                color: var(--color-content-text);
+            } 
+
+            /**MOBILE RESPONSIVENESS**/
+            @media(max-width: 576px) {
+                .podcast-container:hover{
+                    transform: none;
+                }
+
+                podcast-img-div{
+                    width: 1600px;
+                    height: 290px;
+
+                }
+
+                .podcast-img{
+                    height: 220px;
+        
+                }
+
+                .pod-title{
+                    font-size: 1.12rem;
+                }
+
+                .genre-item{
+                    font-size: .8rem;
+                }
+                
+
+                .update-time{
+                    font-size: .95rem
+                }
+
+                
+            }
+        
+
         `
 
+        // assigning classes to the elements
         this.card.classList.add("podcast-container");
         this.imgContainer.classList.add("podcast-img-div");
         this._Img.classList.add("podcast-img");
@@ -97,23 +146,30 @@ export class PodcastPreview extends HTMLElement {
         this.seasonIcon.classList.add("season-icon");
         this.seasonIcon.src = "./images/season.png";
         this._seasons.textContent = `${podcasts.seasons} seasons`;
+        this.genreWrapper.classList.add("genre-wrapper");
         this.updateTime.classList.add("update-time");
+        this._desc.classList.add("podcast-description");
 
         this.card.append(this.imgContainer, this._title, this.seasonContainer, this.genreWrapper, this.updateTime);
         this.imgContainer.append(this._Img);
         this.seasonContainer.append(this.seasonIcon, this._seasons);
         this.shadow.append(style, this.card)
+
+        // MODAL OPEN AND CLOSE
+        modalOpen(this);
+        modalClose();
     }
 
     static get observedAttributes(){
-            return ["pod-title", "pod-image", "pod-genres", "pod-seasons", "pod-date"]
+            return ["pod-title", "pod-image", "pod-genres", "pod-seasons", "pod-date", "pod-desc"]
         }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "pod-title") this._title.textContent = newValue;
         if (name === "pod-image") this._Img.src = newValue;
         if (name === "pod-seasons") this._seasons.textContent = newValue;
-        if (name === "pod-date") this.updateTime.textContent = newValue
+        if (name === "pod-date") this.updateTime.textContent = newValue;
+        if (name === "pod-desc") this._desc.textContent = newValue;
         if (name === "pod-genres") {
             this.genreWrapper.innerHTML = "";
             newValue.split(', ').forEach(title => {
@@ -136,6 +192,7 @@ export function renderPodcast2() {
         podcastEl.setAttribute("pod-title", podcast.title);
         podcastEl.setAttribute("pod-image", podcast.image);
         podcastEl.setAttribute("pod-seasons", `${podcast.seasons} seasons`)
+        podcastEl.setAttribute("pod-desc", podcast.description);
         
         // genres
         const showGenres = genres.filter(genre => genre.shows.includes(podcast.id)).map(genre => genre.title).join(", ");

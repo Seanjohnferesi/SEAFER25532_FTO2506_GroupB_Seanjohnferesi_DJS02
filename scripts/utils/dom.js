@@ -8,4 +8,5 @@ export const modalDesc = modal.querySelector(".pod-info");
 export const modalGenres = modal.querySelector(".genre-flex");
 export const modalDate = document.getElementById("date-formated");
 export const modalSeasons = modal.querySelector(".season-list");
+export const modalImg2 = document.getElementById("modal-img");
  
